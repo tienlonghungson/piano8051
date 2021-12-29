@@ -1,0 +1,15 @@
+*.uvgui.thanh
+*.uvopt 
+*.uvproj  
+*.workspace
+*.uvproj
+Listings
+Objects
+*.pdsprj
+*.pdsbak
+com.c
+speaker.c
+lcd.c
+**/.idea
+**/*.iml
+**/out
