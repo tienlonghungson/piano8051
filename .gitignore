@@ -5,12 +5,7 @@
 *.uvproj
 Listings
 Objects
-*.pdsprj
 *.pdsbak
-com.c
-speaker.c
-lcd.c
 **/.idea
 **/*.iml
 **/out
-Bai 2 - Online.pdf
