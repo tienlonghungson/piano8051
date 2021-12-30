@@ -57,11 +57,18 @@ void TMR0_Handler() interrupt  TF0_VECTOR{
 /************************************************/
 
 /****************** UART API*********************/
+// const int BUFFER_SIZE=100;
+#define BUFFER_SIZE 30
+char buffer[BUFFER_SIZE];
+unsigned char consumer=0, producer=0;
+
 char uart_data;
 void serial_IT(void) interrupt SIO_VECTOR{
   if (RI == 1){ 
     RI = 0; 			/* prepare for next reception */
     uart_data = SBUF; 	/* Read receive data */
+		producer = (producer+1)%BUFFER_SIZE;
+		buffer[producer]=uart_data;
   }
   else 
     TI = 0; 			/* if emission occur */
@@ -91,30 +98,34 @@ void main(void){
 	LCD_Send_Command(0xC0); //Chuyen con tro xuong dong thu 2
 	LCD_Write_String("**************");
 	
+	buffer[0]='q';
 	while(1){
-		for(i=0;i<11;++i){
-			if (uart_data==matched_chords[i]){
-				chord_idx=(i<<1);
-				TH0=chords[chord_idx];
-				TL0=chords[chord_idx+1];
-				if (uart_data!=last_chord){
-					TR0=0;
-					speaker=0;
-				}
-				play_sound();
-				LCD_Write_String(chord_names[i]);
-				break;
+		if (consumer!=producer){
+			consumer= (consumer+1)%BUFFER_SIZE;
+			
+			if (buffer[consumer]=='q'){
+				TR0 = 0;
+				speaker=0;          // turn off speaker
 			}
-		}
+			
+			for(i=0;i<11;++i){
+				if (buffer[consumer]==matched_chords[i]){
+					chord_idx=(i<<1);;
+					TH0=chords[chord_idx];
+					TL0=chords[chord_idx+1];
+					if (buffer[consumer]!=last_chord){
+						TR0=0;
+						speaker=0;
+					}
+					play_sound();
+					LCD_Write_String(chord_names[i]);
+					break;
+				}
+			}	
 
-		if (uart_data=='q'){
-			TR0 = 0;
-			speaker=0;          // turn off speaker
+			LCD_init();
+			last_chord = buffer[consumer];
 		}
-
-		
-		LCD_init();
-		last_chord = uart_data;
 	}			
 }
 
@@ -201,10 +212,6 @@ void delay(unsigned int time){
 
 void play_sound(){
 	TR0=1; // start timer 0
-	// delay(5000);
-	// TR0=0; // stop timer 
-	// speaker=1 ;
-	// delay(30000);
 }
 
 /************************************************/
