@@ -7,6 +7,9 @@ import javafx.scene.paint.Color;
 import javafx.scene.text.Text;
 import javafx.stage.Stage;
 
+import java.util.Arrays;
+import java.util.concurrent.atomic.AtomicInteger;
+
 public class Main extends Application {
     private static SerialPort serialPort;
     private static final KeyCode[] matchedCode = new KeyCode[]{
@@ -19,7 +22,7 @@ public class Main extends Application {
     };
 
     private static final byte[][] dataTo8051 = new byte[][]{
-            {'a'},{'s'},{'d'},{'f'},{'f'},{'g'},{'h'},{'j'},{'k'},{'l'},{'t'},{'y'}
+            {'a'},{'s'},{'d'},{'f'},{'g'},{'h'},{'j'},{'k'},{'l'},{'t'},{'y'}
     };
 
     public static void main(String[] args){
@@ -50,23 +53,25 @@ public class Main extends Application {
         stage.setScene(scene);
         stage.show();
 
+        AtomicInteger lastSent= new AtomicInteger(-1);
         scene.setOnKeyPressed(keyEvent -> {
             for (int i = 0; i < 11; i++) {
                 if (keyEvent.getCode()==matchedCode[i]){
                     text.setText(chordNames[i]+" Is Playing");
-                    serialPort.writeBytes(dataTo8051[i],1 );
+                    if (i!= lastSent.get()){
+                        serialPort.writeBytes(dataTo8051[i],1 );
+                        System.out.println("Sent "+ Arrays.toString(dataTo8051[i]));
+                        lastSent.set(i);
+                    }
+
                 }
             }
         });
 
         scene.setOnKeyReleased(keyEvent -> {
             text.setText("Let's Rock");
-            try {
-                Thread.sleep(700);
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
             serialPort.writeBytes(new byte[]{'q'},1);
+            lastSent.set(-1);
         });
     }
 }
