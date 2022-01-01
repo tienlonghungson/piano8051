@@ -106,22 +106,22 @@ void main(void){
 			if (buffer[consumer]=='q'){
 				TR0 = 0;
 				speaker=0;          // turn off speaker
-			}
-			
-			for(i=0;i<11;++i){
-				if (buffer[consumer]==matched_chords[i]){
-					chord_idx=(i<<1);;
-					TH0=chords[chord_idx];
-					TL0=chords[chord_idx+1];
-					if (buffer[consumer]!=last_chord){
-						TR0=0;
-						speaker=0;
+			} else {
+				for(i=0;i<11;++i){
+					if (buffer[consumer]==matched_chords[i]){
+						chord_idx=(i<<1);;
+						TH0=chords[chord_idx];
+						TL0=chords[chord_idx+1];
+						if (buffer[consumer]!=last_chord){
+							TR0=0;
+							speaker=0;
+						}
+						play_sound();
+						LCD_Write_String(chord_names[i]);
+						break;
 					}
-					play_sound();
-					LCD_Write_String(chord_names[i]);
-					break;
-				}
-			}	
+				}	
+			}
 
 			LCD_init();
 			last_chord = buffer[consumer];
